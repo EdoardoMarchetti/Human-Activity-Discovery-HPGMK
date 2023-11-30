@@ -11,6 +11,8 @@
 
 import numpy as np
 import statistics
+
+import tqdm
 from numba import jit, cuda 
 import math 
 from scipy.signal import find_peaks
@@ -349,8 +351,7 @@ def Feature_normalisation(features):
     print('Feature_normalisation')
 
     f_norm=np.zeros((len(features),len(features[0,:])))
-    for i in range(len(features)):
-        print(i)
+    for i in tqdm.tqdm(range(len(features))):
         for j in range(len(features[0,:])):
             f_norm[i,j]=(features[i,j]-min(features[:,j]))/(max(features[:,j])-min(features[:,j]))
     return f_norm  
