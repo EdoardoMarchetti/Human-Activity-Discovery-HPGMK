@@ -102,6 +102,8 @@ def run(args):
                 data = np.load(extracted_features)
                 keyframes = np.load(extracted_keyframes)
 
+            print(data.shape, keyframes.shape)
+
             #save the results of clustering
             results_folder = osp.join(args.root, args.results_folder, args.dataset)         
             data=dimentaion_reduction(data)
