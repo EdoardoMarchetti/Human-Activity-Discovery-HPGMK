@@ -34,7 +34,7 @@ def run(args):
 
     #dataset=['CAD60','F3D','KARD','UTK','MSR']
     dataset= [args.dataset]
-
+    to_extract = True
 
     for Datasetsss in dataset:
         
@@ -64,27 +64,46 @@ def run(args):
         for subject in range(1,maxsub):
             print('subject: /',subject,'\\')
             data = np.load(osp.join(args.root, args.data_folder, args.dataset,f"sub{subject}.npy"))
+
+            data = data[:1000]
+            print(data.shape)
             true_label = np.load(osp.join(args.root, args.data_folder, args.dataset,f"label{subject}.npy"))
 
-            # data=np.load(r'%s'%save_path+'\Data\%s'%Datasetsss+'\sub%d'%subject+'.npy')
-            # true_label=np.load(r'%s'%save_path+'\Data\%s'%Datasetsss+'\label%d'%subject+'.npy')
-            print('Extracting features: ')
-            data,keyframes=Extraction(data)
-            data=np.nan_to_num(data)
 
-            #save the results of clustering
             results_folder = osp.join(args.root, args.results_folder, args.dataset)
-
+            print(results_folder)
             if not osp.exists(results_folder):
                 os.makedirs(results_folder, exist_ok=True)
+            
+            #Extracted data
+            extracted_features = osp.join(args.root, args.data_folder, args.dataset,f'extracted_features_{subject}.npy')
+            extracted_keyframes = osp.join(args.root, args.data_folder, args.dataset,f'keyframes_{subject}.npy')
+            if osp.exists(extracted_features):
+                to_extract = False
 
+            #Output files
             savefile1 = osp.join(results_folder,f'result_sub_{subject}.csv')
             savefile2 = osp.join(results_folder,f'fscore_sub_{subject}.csv')
             matcon = osp.join(results_folder,f'confusion_sub{subject}.png')
             timesave = osp.join(results_folder, f'time_sub{subject}.npy')
             history1plot = osp.join(results_folder, f'history_sub{subject}.npy')
 
-                        
+            # data=np.load(r'%s'%save_path+'\Data\%s'%Datasetsss+'\sub%d'%subject+'.npy')
+            # true_label=np.load(r'%s'%save_path+'\Data\%s'%Datasetsss+'\label%d'%subject+'.npy')
+            if to_extract:
+                print('Extracting features: ')
+                data,keyframes=Extraction(data)
+                print(keyframes.shape)
+                data=np.nan_to_num(data)
+                np.save(extracted_features, data)
+                np.save(extracted_keyframes, keyframes)
+            else:
+                print('loading extracted data')
+                data = np.load(extracted_features)
+                keyframes = np.load(extracted_keyframes)
+
+            #save the results of clustering
+            results_folder = osp.join(args.root, args.results_folder, args.dataset)         
             data=dimentaion_reduction(data)
             true_label=Keyframe(true_label,keyframes)
             data,ind=Sampling(data,15,true_label)
